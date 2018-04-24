@@ -5,7 +5,9 @@
 
 package com.lwansbrough.RCTCamera;
 
+import android.Manifest;
 import android.content.ContentValues;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.media.*;
@@ -13,6 +15,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Surface;
@@ -346,6 +350,16 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
     }
 
     private void record(final ReadableMap options, final Promise promise, final int deviceOrientation) {
+        if (ContextCompat.checkSelfPermission(getCurrentActivity(),
+                Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(getCurrentActivity(),
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    1);
+
+            promise.reject(new RuntimeException("Microphone permission requested"));
+
+        }
         if (mRecordingPromise != null) {
             return;
         }
