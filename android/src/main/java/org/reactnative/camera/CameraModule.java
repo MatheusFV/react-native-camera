@@ -1,7 +1,12 @@
 package org.reactnative.camera;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+
 import com.facebook.react.bridge.*;
 import com.facebook.react.uimanager.NativeViewHierarchyManager;
 import com.facebook.react.uimanager.UIBlock;
@@ -211,6 +216,16 @@ public class CameraModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void record(final ReadableMap options, final int viewTag, final Promise promise) {
+      if (ContextCompat.checkSelfPermission(getCurrentActivity(),
+              Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+          ActivityCompat.requestPermissions(getCurrentActivity(),
+                  new String[]{Manifest.permission.RECORD_AUDIO},
+                  1);
+
+          promise.reject(new RuntimeException("Microphone permission requested"));
+
+      }
       final ReactApplicationContext context = getReactApplicationContext();
       final File cacheDirectory = mScopedContext.getCacheDirectory();
       UIManagerModule uiManager = context.getNativeModule(UIManagerModule.class);
