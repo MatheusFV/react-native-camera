@@ -225,28 +225,29 @@ public class CameraModule extends ReactContextBaseJavaModule {
 
           promise.reject(new RuntimeException("Microphone permission requested"));
 
-      }
-      final ReactApplicationContext context = getReactApplicationContext();
-      final File cacheDirectory = mScopedContext.getCacheDirectory();
-      UIManagerModule uiManager = context.getNativeModule(UIManagerModule.class);
+      } else {
+          final ReactApplicationContext context = getReactApplicationContext();
+          final File cacheDirectory = mScopedContext.getCacheDirectory();
+          UIManagerModule uiManager = context.getNativeModule(UIManagerModule.class);
 
-      uiManager.addUIBlock(new UIBlock() {
-          @Override
-          public void execute(NativeViewHierarchyManager nativeViewHierarchyManager) {
-              final RNCameraView cameraView;
+          uiManager.addUIBlock(new UIBlock() {
+              @Override
+              public void execute(NativeViewHierarchyManager nativeViewHierarchyManager) {
+                  final RNCameraView cameraView;
 
-              try {
-                  cameraView = (RNCameraView) nativeViewHierarchyManager.resolveView(viewTag);
-                  if (cameraView.isCameraOpened()) {
-                      cameraView.record(options, promise, cacheDirectory);
-                  } else {
-                      promise.reject("E_CAMERA_UNAVAILABLE", "Camera is not running");
+                  try {
+                      cameraView = (RNCameraView) nativeViewHierarchyManager.resolveView(viewTag);
+                      if (cameraView.isCameraOpened()) {
+                          cameraView.record(options, promise, cacheDirectory);
+                      } else {
+                          promise.reject("E_CAMERA_UNAVAILABLE", "Camera is not running");
+                      }
+                  } catch (Exception e) {
+                      promise.reject("E_CAMERA_BAD_VIEWTAG", "recordAsync: Expected a Camera component");
                   }
-              } catch (Exception e) {
-                  promise.reject("E_CAMERA_BAD_VIEWTAG", "recordAsync: Expected a Camera component");
               }
-          }
-      });
+          });
+      }
   }
 
   @ReactMethod
